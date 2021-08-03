@@ -18,7 +18,15 @@ export class Location {
 
   @ApiProperty()
   @Column()
-  lattitude: string;
+  description: string;
+  
+  @ApiProperty()
+  @Column()
+  thumbnail: string;
+
+  @ApiProperty()
+  @Column()
+  latitude: string;
 
   @ApiProperty()
   @Column()

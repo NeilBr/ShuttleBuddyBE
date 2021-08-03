@@ -2,13 +2,19 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { LocationsService } from './locations.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { Location } from './entities/location.entity';
 
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+
+@ApiTags('Locations')
 @Controller('locations')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
+  @ApiBody({ type: CreateLocationDto })
   @Post()
   create(@Body() createLocationDto: CreateLocationDto) {
+    console.log(createLocationDto);
     return this.locationsService.create(createLocationDto);
   }
 

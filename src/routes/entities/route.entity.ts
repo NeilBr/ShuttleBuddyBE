@@ -10,6 +10,10 @@ export class Route {
 
   @ApiProperty()
   @Column()
+  name: string;
+
+  @ApiProperty()
+  @Column()
   routeStops: string;
 
   @ApiProperty()
