@@ -14,7 +14,6 @@ export class LocationsController {
   @ApiBody({ type: CreateLocationDto })
   @Post()
   create(@Body() createLocationDto: CreateLocationDto) {
-    console.log(createLocationDto);
     return this.locationsService.create(createLocationDto);
   }
 
@@ -29,8 +28,8 @@ export class LocationsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
-    return this.locationsService.update(+id, updateLocationDto);
+  update(@Param('id') id: string, @Body() updateLocationDto: Location) {
+    return this.locationsService.update(updateLocationDto);
   }
 
   @Delete(':id')

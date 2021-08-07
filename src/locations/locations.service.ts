@@ -24,8 +24,8 @@ export class LocationsService {
     return `This action returns a #${id} location`;
   }
 
-  update(id: number, updateLocationDto: UpdateLocationDto) {
-    return `This action updates a #${id} location`;
+  async update(updateLocationDto: Location) {
+    return await this.locationRepository.save(updateLocationDto);
   }
 
   remove(id: number) {

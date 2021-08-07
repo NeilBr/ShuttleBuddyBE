@@ -13,11 +13,11 @@ export class Route {
   name: string;
 
   @ApiProperty()
-  @Column()
+  @Column("text")
   routeStops: string;
 
   @ApiProperty()
-  @Column()
+  @Column("text")
   pathPoints: string;
 
   @ApiProperty()

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
+import { Route } from './entities/route.entity';
 
 @Controller('routes')
 export class RoutesController {
@@ -23,8 +24,8 @@ export class RoutesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRouteDto: UpdateRouteDto) {
-    return this.routesService.update(+id, updateRouteDto);
+  update(@Param('id') id: string, @Body() updateRouteDto: Route) {
+    return this.routesService.update(updateRouteDto);
   }
 
   @Delete(':id')
