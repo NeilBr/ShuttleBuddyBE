@@ -8,41 +8,74 @@ import {
  } from '@nestjs/websockets';
  import { Logger } from '@nestjs/common';
  import { Socket, Server } from 'socket.io';
- @WebSocketGateway(4201, {namespace : 'maps-socket'})
- export class MapsSessionGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+ @WebSocketGateway(3001, {namespace: 'map-socket'})
+ export class MapsSessionGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer() server: Server;
+  users: number = 0;
+  shuttleLocations = [] as any[];
 
-  attendees: any[];
 
-  constructor(){
+  constructor(private schedulerRegistry: SchedulerRegistry){
+    
   }
 
-  private logger: Logger = new Logger('AppGateway');
-
-  @SubscribeMessage('undoAttendance')
-  handleMessage(client: Socket, payload: string): void {
-    const actives = JSON.parse(payload)
-    this.server.emit('undoAttendance', payload);
+  @Cron('*/5 * * * * *', {
+    name: 'sendLocationUpdates',
+  })
+  sendLocationUpdates() {
+    this.server.emit('shuttleLocationUpdates', this.shuttleLocations);
   }
 
-
-  @SubscribeMessage('studentAttended')
-  markAsAttended(client: Socket, payload: string): void{
-      const attend = JSON.parse(payload);
+  OnGatewayInit(){
   }
 
-  afterInit(server: Server) {
-   this.logger.log('Init');
+  async handleConnection(client: Socket) {
+    // A client has connected
+    this.users++;
+    // Notify connected clients of current users
+    console.log('Connection #' + this.users, client.conn.id );
+    this.server.emit('users', this.users);
+    if(!this.schedulerRegistry.getCronJob('sendLocationUpdates')){
+      this.sendLocationUpdates();
+    }
   }
 
-  handleDisconnect(client: Socket) {
-   this.logger.log(`Client disconnected: ${client.id}`);
+  async handleDisconnect(client: Socket) {
+    // A client has disconnected
+    this.users--;
+    // Notify connected clients of current users
+    // if(this.users === 0){
+    //   this.schedulerRegistry.getCronJob('sendLocationUpdates').stop();
+    // }
+    this.server.emit('users', this.users);
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
-   this.logger.log(`Client connected: ${client.id}`);
-   console.log('Current Clients', this.server.sockets.allSockets.length);
+  
+  @SubscribeMessage('chat')
+  async onChat(client: Socket, payload: string) {
+    console.log(payload);
+    this.server.emit('users', this.users);
+  }
+
+  @SubscribeMessage('shuttleLocation')
+  async onGetLocation(client: Socket, payload: string) {
+    await this.addOrUpdateShuttleLocations(JSON.parse(payload))
+    console.log(this.shuttleLocations);
+  }
+
+  addOrUpdateShuttleLocations(payload){
+    let found = false;
+    this.shuttleLocations.forEach((shuttleLocation) => {
+      if(shuttleLocation.shuttleId === payload.shuttleId){
+        found = true;
+        shuttleLocation.position = payload.position;
+      }
+    });
+    if(!found){
+      this.shuttleLocations.push(payload);
+    }
   }
 
  }

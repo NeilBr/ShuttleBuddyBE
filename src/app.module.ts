@@ -9,6 +9,8 @@ import { AuthController } from './auth/auth.controller';
 import { RoutesModule } from './routes/routes.module';
 import { LocationsModule } from './locations/locations.module';
 import { ShuttlesModule } from './shuttles/shuttles.module';
+import { MapsSessionGateway } from './maps-session/maps.session.gateway';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { ShuttlesModule } from './shuttles/shuttles.module';
           autoLoadEntities: true,
         }),
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     RoutesModule,
@@ -25,7 +28,7 @@ import { ShuttlesModule } from './shuttles/shuttles.module';
     ShuttlesModule
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService],
+  providers: [AppService, MapsSessionGateway],
 })
 export class AppModule {
   constructor(private readonly connection: Connection){
