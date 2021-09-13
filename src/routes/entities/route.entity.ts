@@ -26,6 +26,10 @@ export class Route {
 
   @ApiProperty()
   @Column()
+  startTimes: string;
+
+  @ApiProperty()
+  @Column()
   startLocationID: number;
   
   @ApiProperty()

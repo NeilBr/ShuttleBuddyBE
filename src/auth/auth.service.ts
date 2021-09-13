@@ -33,6 +33,9 @@ export class AuthService {
       plainPassword: string
     ): Promise<boolean> {
       const bcrypt = require('bcrypt');
+      bcrypt.hash(plainPassword, 10).then(function(hash) {
+        console.log(hash);
+    });
      return await bcrypt.compare(plainPassword, hashedPassword);
     }
 }

@@ -1,15 +1,16 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { RoutesService } from './routes.service';
-import { CreateRouteDto } from './dto/create-route.dto';
-import { UpdateRouteDto } from './dto/update-route.dto';
-import { Route } from './entities/route.entity';
+import { ScheduleService } from '../route-schedule/schedule.service';
 
 @Controller('routes')
 export class RoutesController {
-  constructor(private readonly routesService: RoutesService) {}
+  constructor(
+    private readonly routesService: RoutesService,
+    private readonly scheduleService: ScheduleService
+    ) {}
 
   @Post()
-  create(@Body() createRouteDto: CreateRouteDto) {
+  create(@Body() createRouteDto: any) {
     return this.routesService.create(createRouteDto);
   }
 
@@ -24,7 +25,7 @@ export class RoutesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRouteDto: Route) {
+  update(@Param('id') id: string, @Body() updateRouteDto: any) {
     return this.routesService.update(updateRouteDto);
   }
 
@@ -32,4 +33,23 @@ export class RoutesController {
   remove(@Param('id') id: string) {
     return this.routesService.remove(+id);
   }
+
+  
+  @Get('schedule/all')
+  findAllSchedules() {
+    return this.scheduleService.getAllSchedules();
+  }
+
+  @Get('schedule/list')
+  async findAllSchedulesForList() {
+    const routesWithIDs = await this.routesService.getRouteWithIDs();
+    return this.scheduleService.getAllSchedulesForList(routesWithIDs);
+  }
+  
+  
+  @Get('schedule/:id')
+  getScheduleByRouteID(@Param('id') id: string) {
+    return this.scheduleService.getScheduleForRoute(+id);
+  }
+
 }
