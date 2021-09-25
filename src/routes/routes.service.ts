@@ -52,8 +52,8 @@ export class RoutesService {
     const locationsOnRoute = await this.getLocationsOnRoute(route);
     
     let lastStop = null;
-    console.log('START');
-    await routeStops.forEach(async (stop, index) =>{
+    let index = 0;
+    for (const stop of routeStops) {
       if(lastStop){   
         const durations = await this.getDurationOfTrips(lastStop, route, locationsOnRoute, index);        
         const newTimes = await this.getEstimatedTimes(lastStop.estTime, durations);        
@@ -63,7 +63,6 @@ export class RoutesService {
           locationID: stop.locationID ,
         }  as RouteSchedule;
         
-        console.log(index,'Add stop', JSON.stringify(routeStop));
         allRouteStops.push(routeStop);
         lastStop = routeStop;
       } else {
@@ -81,11 +80,10 @@ export class RoutesService {
 
       }
       if(index === routeStops.length - 1){
-        console.log('END');
-        console.log('ALL ROUTE STOPS', JSON.stringify(allRouteStops));
         await this.routeStopRepository.save(allRouteStops);
       }
-    });
+      index += 1;
+    }
     
   }
 
@@ -149,7 +147,6 @@ export class RoutesService {
         })).then(result =>{
           return result.data.rows[0].elements[0].duration.value;
         })
-        console.log(i, 'DURATION', curDuration);
         durations.push(curDuration);
     }
     return durations;

@@ -14,8 +14,8 @@ export class UsersService {
     return 'This action adds a new user';
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.repository.find();
   }
 
   async findOne(username: string): Promise<User | undefined> {
@@ -26,11 +26,11 @@ export class UsersService {
     return this.repository.findOne({id: id});
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(updateUserDto: UpdateUserDto) {
+    return this.repository.save(updateUserDto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    return this.repository.delete(id);
   }
 }

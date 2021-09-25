@@ -28,6 +28,18 @@ import { Cron, SchedulerRegistry } from '@nestjs/schedule';
     this.server.emit('shuttleLocationUpdates', this.shuttleLocations);
   }
 
+  @Cron('*/10 * * * * *', {
+    name: 'checkShuttles',
+  })
+  checkShuttles() {
+    this.shuttleLocations.forEach((shuttleLocation, index) => {
+      if(shuttleLocation.clientID === null || shuttleLocation.clientID === undefined){
+        this.shuttleLocations.splice(index);
+      }
+    });
+  }
+
+
   OnGatewayInit(){
   }
 
@@ -44,33 +56,51 @@ import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 
   async handleDisconnect(client: Socket) {
     // A client has disconnected
-    this.users--;
+    --this.users;
+    this.removeShuttle(client.id);
     // Notify connected clients of current users
-    // if(this.users === 0){
-    //   this.schedulerRegistry.getCronJob('sendLocationUpdates').stop();
-    // }
+    if(this.users === 0){
+      // this.schedulerRegistry.getCronJob('sendLocationUpdates').stop();
+      // this.schedulerRegistry.getCronJob('checkShuttles').stop();
+    }
     this.server.emit('users', this.users);
   }
 
   
   @SubscribeMessage('chat')
   async onChat(client: Socket, payload: string) {
-    console.log(payload);
     this.server.emit('users', this.users);
   }
 
   @SubscribeMessage('shuttleLocation')
-  async onGetLocation(client: Socket, payload: string) {
-    await this.addOrUpdateShuttleLocations(JSON.parse(payload))
-    console.log(this.shuttleLocations);
+  onGetLocation(client: Socket, payload: string) {
+    // console.log(payload);
+    this.addOrUpdateShuttleLocations(JSON.parse(payload));
+    if(!this.schedulerRegistry.getCronJob('checkShuttles')){
+      this.sendLocationUpdates();
+    }
+    // console.log(this.shuttleLocations);
   }
 
   addOrUpdateShuttleLocations(payload){
     let found = false;
     this.shuttleLocations.forEach((shuttleLocation) => {
-      if(shuttleLocation.shuttleId === payload.shuttleId){
+      if(shuttleLocation.clientID === payload.clientID){
         found = true;
         shuttleLocation.position = payload.position;
+      }
+    });
+    if(!found){
+      this.shuttleLocations.push(payload);
+    }
+  }
+
+  removeShuttle(payload){
+    let found = false;
+    this.shuttleLocations.forEach((shuttleLocation, index) => {
+      if(shuttleLocation.clientID === payload){
+        found = true;
+        this.shuttleLocations.splice(index);
       }
     });
     if(!found){

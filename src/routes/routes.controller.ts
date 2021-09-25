@@ -26,6 +26,7 @@ export class RoutesController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRouteDto: any) {
+    console.log(updateRouteDto);
     return this.routesService.update(updateRouteDto);
   }
 
@@ -45,11 +46,19 @@ export class RoutesController {
     const routesWithIDs = await this.routesService.getRouteWithIDs();
     return this.scheduleService.getAllSchedulesForList(routesWithIDs);
   }
-  
-  
+
   @Get('schedule/:id')
-  getScheduleByRouteID(@Param('id') id: string) {
-    return this.scheduleService.getScheduleForRoute(+id);
+  async findAllSchedulesForRoute(@Param('id') id: string) {
+    
+    const route = await this.routesService.findOne(+id);
+
+    const routesForReturn = {
+      routes: [route],
+      ids: [route.id]
+    };
+    return this.scheduleService.getAllSchedulesForList(routesForReturn).then(result => {
+      return result.routes[0];
+    });
   }
 
 }
