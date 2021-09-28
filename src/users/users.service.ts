@@ -10,8 +10,8 @@ export class UsersService {
   
   constructor( @InjectRepository(User) private repository: Repository<User> ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(user: any) {
+    return await this.repository.save(user);
   }
 
   async findAll() {
@@ -26,8 +26,8 @@ export class UsersService {
     return this.repository.findOne({id: id});
   }
 
-  update(updateUserDto: UpdateUserDto) {
-    return this.repository.save(updateUserDto);
+  update(user: any) {
+    return this.repository.save(user);
   }
 
   remove(id: number) {
